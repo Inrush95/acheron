@@ -20,11 +20,11 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install Qt 5 (Windows 7 Compatible)
+      - name: Install Qt 5 (MSVC 32-bit for Win7)
         uses: jurplel/install-qt-action@v4
         with:
           version: '5.15.2'
-          arch: 'win32_mingw' # <-- Fixed the spelling here!
+          arch: 'win32_msvc2019' # Swapped to the pre-installed Visual Studio compiler
           modules: qtimageformats
           cache: true
 
@@ -32,7 +32,7 @@ jobs:
         shell: pwsh
         run: |
           git -C vendor/vcpkg fetch --unshallow
-          vendor/vcpkg/bootstrap-vcpkg.bat
+          ./vendor/vcpkg/bootstrap-vcpkg.bat
 
       - name: Cache vcpkg packages
         uses: actions/cache@v4
@@ -49,12 +49,12 @@ jobs:
           \$inner = Get-ChildItem -Path ffmpeg-extract -Directory | Select-Object -First 1
           Move-Item -Path \$inner.FullName -Destination ffmpeg
 
-      - name: Configure CMake for 32-bit + Voice
+      - name: Configure CMake for 32-bit (x86) + Voice
         shell: pwsh
         run: |
           ffmpegDir = "{{ github.workspace }}/ffmpeg"
           cmake -B build -S . `
-            -G "MinGW Makefiles" `
+            -A Win32 `
             -DCMAKE_BUILD_TYPE=Release `
             -DVCPKG_TARGET_TRIPLET=x86-windows-static-md `
             -DCMAKE_PREFIX_PATH="\(env:QT_ROOT_DIR;\)ffmpegDir" `
@@ -69,20 +69,20 @@ jobs:
       - name: Deploy Qt Dependencies
         shell: pwsh
         run: |
-          exe = "{{ github.workspace }}/build/acheron.exe"
+          exe = "{{ github.workspace }}/build/Release/acheron.exe"
           windeployqt --no-translations --no-opengl-sw --no-system-d3d-compiler \$exe
 
       - name: Prepare Artifact Folder
         shell: pwsh
         run: |
           \$out = "acheron-windows7-32bit-voice"
-          \$binDir = "build"
+          \$binDir = "build/Release"
           ffmpegDir = "{{ github.workspace }}/ffmpeg"
           New-Item -ItemType Directory -Path \$out -Force
           
           Copy-Item "binDir/*" out -Recurse -Force
           Copy-Item "ffmpegDir/bin/*.dll" out -Force
-          Remove-Item "\$out/CMakeFiles","out/Makefile","out/cmake_install.cmake" -Recurse -ErrorAction SilentlyContinue
+          Remove-Item "\$out/CMakeFiles" -Recurse -ErrorAction SilentlyContinue
 
       - name: Upload 32-bit App Bundle
         uses: actions/upload-artifact@v4
