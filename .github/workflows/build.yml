@@ -20,11 +20,11 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install Qt 5 (MSVC 32-bit for Win7)
+      - name: Install Qt 5 (MSVC 32-bit)
         uses: jurplel/install-qt-action@v4
         with:
           version: '5.15.2'
-          arch: 'win32_msvc2019' # Swapped to the pre-installed Visual Studio compiler
+          arch: 'win32_msvc2019'
           modules: qtimageformats
           cache: true
 
@@ -40,7 +40,7 @@ jobs:
           path: build/vcpkg_installed
           key: vcpkg-x86-windows-static-md-\${{ hashFiles('vcpkg.json') }}
 
-      - name: Install 32-bit FFmpeg (For Voice/Audio)
+      - name: Install 32-bit FFmpeg
         shell: pwsh
         run: |
           \$url = "https://github.com\({{ env.FFMPEG_RELEASE_TAG }}/\){{ env.FFMPEG_WINDOWS_BUILD }}.zip"
@@ -49,7 +49,7 @@ jobs:
           \$inner = Get-ChildItem -Path ffmpeg-extract -Directory | Select-Object -First 1
           Move-Item -Path \$inner.FullName -Destination ffmpeg
 
-      - name: Configure CMake for 32-bit (x86) + Voice
+      - name: Configure CMake
         shell: pwsh
         run: |
           ffmpegDir = "{{ github.workspace }}/ffmpeg"
