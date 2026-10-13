@@ -25,7 +25,6 @@ jobs:
         with:
           version: '5.15.2'
           arch: 'win32_msvc2019'
-          # Removed the modules line to fix the XML parsing error!
           cache: true
 
       - name: Bootstrap vcpkg
