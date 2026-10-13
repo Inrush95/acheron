@@ -33,17 +33,17 @@ jobs:
         uses: actions/cache@v4
         with:
           path: build/vcpkg_installed
-          key: vcpkg-x86-windows-static-md-v4-${{ hashFiles('vcpkg.json') }}
+          key: vcpkg-x86-windows-static-md-v5-${{ hashFiles('vcpkg.json') }}
 
       - name: Force Install 32-bit FFmpeg Core Libraries
         shell: cmd
         run: |
           .\vendor\vcpkg\vcpkg install ffmpeg[gpl,opus]:x86-windows-static-md --classic
 
-      - name: Configure CMake (Forced Verification Bypass)
+      - name: Configure CMake (Forced Version Bypass)
         shell: cmd
         run: |
-          cmake -B build -S . -A Win32 -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x86-windows-static-md -DCMAKE_TOOLCHAIN_FILE="%GITHUB_WORKSPACE%/vendor/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_PREFIX_PATH="%QT_ROOT_DIR%;%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md" -DCURL_INCLUDE_DIR="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/include" -DCURL_LIBRARY="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/lib/libcurl.lib" -DBUILD_TESTS=OFF -DENABLE_VOICE=ON -DENABLE_RNNOISE=ON -DENABLE_FFMPEG=ON -DFFMPEG_FOUND=TRUE -DFFMPEG_INCLUDE_DIR="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/include" -DLIBAVCODEC_INCLUDE_DIR="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/include" -DLIBAVCODEC_LIBRARY="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/lib/avcodec.lib" -DLIBAVFORMAT_LIBRARY="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/lib/avformat.lib" -DLIBAVUTIL_LIBRARY="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/lib/avutil.lib" -DLIBSWSCALE_LIBRARY="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/lib/swscale.lib" -DLIBSWRESAMPLE_LIBRARY="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/lib/swresample.lib"
+          cmake -B build -S . -A Win32 -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x86-windows-static-md -DCMAKE_TOOLCHAIN_FILE="%GITHUB_WORKSPACE%/vendor/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_PREFIX_PATH="%QT_ROOT_DIR%;%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md" -DCURL_INCLUDE_DIR="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/include" -DCURL_LIBRARY="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/lib/libcurl.lib" -DBUILD_TESTS=OFF -DENABLE_VOICE=ON -DENABLE_RNNOISE=ON -DENABLE_FFMPEG=ON -DFFMPEG_FOUND=TRUE -DFFMPEG_INCLUDE_DIR="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/include" -DLIBAVUTIL_VERSION=57.28.100 -DLIBAVCODEC_INCLUDE_DIR="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/include" -DLIBAVCODEC_LIBRARY="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/lib/avcodec.lib" -DLIBAVFORMAT_LIBRARY="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/lib/avformat.lib" -DLIBAVUTIL_LIBRARY="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/lib/avutil.lib" -DLIBSWSCALE_LIBRARY="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/lib/swscale.lib" -DLIBSWRESAMPLE_LIBRARY="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/lib/swresample.lib"
 
       - name: Build App
         run: cmake --build build --config Release --parallel
