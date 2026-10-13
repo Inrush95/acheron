@@ -35,10 +35,10 @@ jobs:
           path: build/vcpkg_installed
           key: vcpkg-x86-windows-static-md-${{ hashFiles('vcpkg.json') }}
 
-      - name: Configure CMake with Explicit Path Pointers
+      - name: Configure CMake
         shell: cmd
         run: |
-          cmake -B build -S . -A Win32 -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x86-windows-static-md -DCMAKE_PREFIX_PATH="%QT_ROOT_DIR%" -DCMAKE_TOOLCHAIN_FILE="%GITHUB_WORKSPACE%/vendor/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCURL_INCLUDE_DIR="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/include" -DCURL_LIBRARY="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/lib/libcurl.lib" -DBUILD_TESTS=OFF -DENABLE_VOICE=ON -DENABLE_RNNOISE=ON -DENABLE_FFMPEG=ON
+          cmake -B build -S . -A Win32 -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x86-windows-static-md -DCMAKE_TOOLCHAIN_FILE="%GITHUB_WORKSPACE%/vendor/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_PREFIX_PATH="%QT_ROOT_DIR%;%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md" -DCURL_INCLUDE_DIR="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/include" -DCURL_LIBRARY="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/lib/libcurl.lib" -DBUILD_TESTS=OFF -DENABLE_VOICE=ON -DENABLE_RNNOISE=ON -DENABLE_FFMPEG=ON
 
       - name: Build App
         run: cmake --build build --config Release --parallel
