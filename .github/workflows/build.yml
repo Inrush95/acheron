@@ -28,62 +28,44 @@ jobs:
           cache: true
 
       - name: Bootstrap vcpkg
-        shell: pwsh
+        shell: cmd
         run: |
           git -C vendor/vcpkg fetch --unshallow
-          ./vendor/vcpkg/bootstrap-vcpkg.bat
+          call .\vendor\vcpkg\bootstrap-vcpkg.bat
 
       - name: Cache vcpkg packages
         uses: actions/cache@v4
         with:
           path: build/vcpkg_installed
-          key: vcpkg-x86-windows-static-md-\${{ hashFiles('vcpkg.json') }}
+          key: vcpkg-x86-windows-static-md-${{ hashFiles('vcpkg.json') }}
 
       - name: Install 32-bit FFmpeg
-        shell: pwsh
+        shell: cmd
         run: |
-          \(releaseTag = "\)env:FFMPEG_RELEASE_TAG"
-          \(buildName = "\)env:FFMPEG_WINDOWS_BUILD"
-          \$url = "https://github.com\(releaseTag/\)buildName.zip"
-          Invoke-WebRequest -Uri \$url -OutFile ffmpeg.zip
-          Expand-Archive -Path ffmpeg.zip -DestinationPath ffmpeg-extract -Force
-          \$inner = Get-ChildItem -Path ffmpeg-extract -Directory | Select-Object -First 1
-          Move-Item -Path \$inner.FullName -Destination ffmpeg
+          curl -L -o ffmpeg.zip https://github.com
+          powershell Expand-Archive -Path ffmpeg.zip -DestinationPath ffmpeg-extract -Force
+          move ffmpeg-extract\%FFMPEG_WINDOWS_BUILD% ffmpeg
 
       - name: Configure CMake
-        shell: pwsh
+        shell: cmd
         run: |
-          \(ffmpegDir = "\){{ github.workspace }}/ffmpeg"
-          cmake -B build -S . `
-            -A Win32 `
-            -DCMAKE_BUILD_TYPE=Release `
-            -DVCPKG_TARGET_TRIPLET=x86-windows-static-md `
-            -DCMAKE_PREFIX_PATH="\(env:QT_ROOT_DIR;\)ffmpegDir" `
-            -DBUILD_TESTS=OFF `
-            -DENABLE_VOICE=ON `
-            -DENABLE_RNNOISE=ON `
-            -DENABLE_FFMPEG=ON
+          cmake -B build -S . -A Win32 -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x86-windows-static-md -DCMAKE_PREFIX_PATH="%QT_ROOT_DIR%;%GITHUB_WORKSPACE%/ffmpeg" -DBUILD_TESTS=OFF -DENABLE_VOICE=ON -DENABLE_RNNOISE=ON -DENABLE_FFMPEG=ON
 
       - name: Build App
         run: cmake --build build --config Release --parallel
 
       - name: Deploy Qt Dependencies
-        shell: pwsh
+        shell: cmd
         run: |
-          \(exe = "\){{ github.workspace }}/build/Release/acheron.exe"
-          windeployqt --no-translations --no-opengl-sw --no-system-d3d-compiler \$exe
+          windeployqt --no-translations --no-opengl-sw --no-system-d3d-compiler build\Release\acheron.exe
 
       - name: Prepare Artifact Folder
-        shell: pwsh
+        shell: cmd
         run: |
-          \$outDir = "acheron-windows7-32bit-voice"
-          \$binDir = "build/Release"
-          \(ffmpegDir = "\){{ github.workspace }}/ffmpeg"
-          New-Item -ItemType Directory -Path \$outDir -Force
-          
-          Copy-Item "\(binDir/*" \)outDir -Recurse -Force
-          Copy-Item "\(ffmpegDir/bin/*.dll" \)outDir -Force
-          Remove-Item "\$outDir/CMakeFiles" -Recurse -ErrorAction SilentlyContinue
+          mkdir acheron-windows7-32bit-voice
+          xcopy build\Release\* acheron-windows7-32bit-voice\ /E /Y
+          xcopy ffmpeg\bin\*.dll acheron-windows7-32bit-voice\ /Y
+          rmdir /S /Q acheron-windows7-32bit-voice\CMakeFiles
 
       - name: Upload 32-bit App Bundle
         uses: actions/upload-artifact@v4
