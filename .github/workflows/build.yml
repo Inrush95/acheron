@@ -33,12 +33,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: build/vcpkg_installed
-          key: vcpkg-x86-windows-static-md-${{ hashFiles('vcpkg.json') }}
+          key: vcpkg-x86-windows-${{ hashFiles('vcpkg.json') }}
 
       - name: Configure CMake
         shell: cmd
         run: |
-          cmake -B build -S . -A Win32 -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x86-windows-static-md -DCMAKE_TOOLCHAIN_FILE="%GITHUB_WORKSPACE%/vendor/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_PREFIX_PATH="%QT_ROOT_DIR%;%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md" -DCURL_INCLUDE_DIR="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/include" -DCURL_LIBRARY="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows-static-md/lib/libcurl.lib" -DBUILD_TESTS=OFF -DENABLE_VOICE=ON -DENABLE_RNNOISE=ON -DENABLE_FFMPEG=ON
+          cmake -B build -S . -A Win32 -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x86-windows -DCMAKE_TOOLCHAIN_FILE="%GITHUB_WORKSPACE%/vendor/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_PREFIX_PATH="%QT_ROOT_DIR%;%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows" -DCURL_INCLUDE_DIR="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows/include" -DCURL_LIBRARY="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows/lib/libcurl.lib" -DBUILD_TESTS=OFF -DENABLE_VOICE=ON -DENABLE_RNNOISE=ON -DENABLE_FFMPEG=ON
 
       - name: Build App
         run: cmake --build build --config Release --parallel
@@ -53,6 +53,7 @@ jobs:
         run: |
           mkdir acheron-windows7-32bit-voice
           xcopy build\Release\* acheron-windows7-32bit-voice\ /E /Y
+          xcopy build\vcpkg_installed\x86-windows\bin\*.dll acheron-windows7-32bit-voice\ /Y
           rmdir /S /Q acheron-windows7-32bit-voice\CMakeFiles
 
       - name: Upload 32-bit App Bundle
