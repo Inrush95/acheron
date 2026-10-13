@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 env:
-  FFMPEG_RELEASE_TAG: autobuild-2026-07-31-14-10
-  FFMPEG_WINDOWS_BUILD: ffmpeg-n8.1.2-34-g9b6c8969e0-win32-lgpl-shared-8.1
+  FFMPEG_URL: https://github.com
+  FFMPEG_DIR_NAME: ffmpeg-n7.1-win32-lgpl-shared
 
 jobs:
   build-windows-32bit-voice:
@@ -42,9 +42,9 @@ jobs:
       - name: Install 32-bit FFmpeg
         shell: cmd
         run: |
-          curl -L -o ffmpeg.zip https://github.com
-          powershell Expand-Archive -Path ffmpeg.zip -DestinationPath ffmpeg-extract -Force
-          move ffmpeg-extract\%FFMPEG_WINDOWS_BUILD% ffmpeg
+          curl -L -o ffmpeg.zip %FFMPEG_URL%
+          7z x ffmpeg.zip -y
+          move %FFMPEG_DIR_NAME% ffmpeg
 
       - name: Configure CMake
         shell: cmd
