@@ -29,16 +29,15 @@ jobs:
           git -C vendor/vcpkg fetch --unshallow
           call .\vendor\vcpkg\bootstrap-vcpkg.bat
 
-      - name: Cache vcpkg packages
-        uses: actions/cache@v4
-        with:
-          path: build/vcpkg_installed
-          key: vcpkg-x86-windows-${{ hashFiles('vcpkg.json') }}
+      - name: Force Install 32-bit Voice Libraries (Classic Mode)
+        shell: cmd
+        run: |
+          .\vendor\vcpkg\vcpkg install openssl:x86-windows nlohmann-json:x86-windows catch2:x86-windows opus:x86-windows libsodium:x86-windows rapidjson:x86-windows rlottie:x86-windows nayuki-qr-code-generator:x86-windows --classic
 
       - name: Configure CMake
         shell: cmd
         run: |
-          cmake -B build -S . -A Win32 -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x86-windows -DCMAKE_TOOLCHAIN_FILE="%GITHUB_WORKSPACE%/vendor/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_PREFIX_PATH="%QT_ROOT_DIR%;%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows" -DCURL_INCLUDE_DIR="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows/include" -DCURL_LIBRARY="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows/lib/libcurl.lib" -DBUILD_TESTS=OFF -DENABLE_VOICE=ON -DENABLE_RNNOISE=ON -DENABLE_FFMPEG=ON
+          cmake -B build -S . -A Win32 -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="%QT_ROOT_DIR%;%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows" -DCURL_INCLUDE_DIR="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows/include" -DCURL_LIBRARY="%GITHUB_WORKSPACE%/build/vcpkg_installed/x86-windows/lib/libcurl.lib" -DBUILD_TESTS=OFF -DENABLE_VOICE=ON -DENABLE_RNNOISE=ON -DENABLE_FFMPEG=ON
 
       - name: Build App
         run: cmake --build build --config Release --parallel
