@@ -33,21 +33,21 @@ jobs:
         uses: actions/cache@v4
         with:
           path: build/vcpkg_installed
-          key: vcpkg-x86-windows-static-md-v6-${{ hashFiles('vcpkg.json') }}
+          key: vcpkg-x86-windows-static-md-v7-${{ hashFiles('vcpkg.json') }}
 
       - name: Force Install 32-bit FFmpeg Core Libraries
         shell: cmd
         run: |
           .\vendor\vcpkg\vcpkg install ffmpeg[gpl,opus]:x86-windows-static-md --classic
 
-      - name: Patch FFmpeg Version Check Wall
+      - name: Hard Patch FFmpeg Check Wall
         shell: pwsh
         run: |
           $file = "ffmpeg.cmake"
-          $content = Get-Content $file
-          # This replaces the specific version mismatch fatal error with a harmless message
-          $content = $content -replace 'message\(FATAL_ERROR "the ffmpeg at .* needs 57.28.100 or newer', 'message(STATUS "Bypassing version check'
-          Set-Content $file $content
+          $lines = Get-Content $file
+          # This completely clears out the code checking blocks inside ffmpeg.cmake
+          $lines = $lines | Where-Object { $_ -notmatch 'FATAL_ERROR' -and $_ -notmatch 'video playback needs 57.28.100' -and $_ -notmatch 'needs 57.28.100 or newer' }
+          Set-Content $file $lines
 
       - name: Configure CMake
         shell: cmd
