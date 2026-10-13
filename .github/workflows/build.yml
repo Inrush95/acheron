@@ -5,9 +5,9 @@ on:
     branches: [master, ci/**]
   pull_request:
     branches: [master]
+  workflow_dispatch: # <-- THIS MAGIC LINE ADDS THE RUN WORKFLOW BUTTON!
 
 env:
-  # Pin a 32-bit compatible FFmpeg archive
   FFMPEG_RELEASE_TAG: autobuild-2026-07-31-14-10
   FFMPEG_WINDOWS_BUILD: ffmpeg-n8.1.2-34-g9b6c8969e0-win32-lgpl-shared-8.1
 
@@ -80,13 +80,8 @@ jobs:
           ffmpegDir = "{{ github.workspace }}/ffmpeg"
           New-Item -ItemType Directory -Path \$out -Force
           
-          # Copy compiled program and graphics files
           Copy-Item "binDir/*" out -Recurse -Force
-          
-          # Copy the 32-bit voice audio DLL files from FFmpeg
           Copy-Item "ffmpegDir/bin/*.dll" out -Force
-          
-          # Clean out messy setup leftovers
           Remove-Item "\$out/CMakeFiles","out/Makefile","out/cmake_install.cmake" -Recurse -ErrorAction SilentlyContinue
 
       - name: Upload 32-bit App Bundle
