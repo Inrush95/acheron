@@ -5,7 +5,7 @@ on:
     branches: [master, ci/**]
   pull_request:
     branches: [master]
-  workflow_dispatch: # <-- THIS MAGIC LINE ADDS THE RUN WORKFLOW BUTTON!
+  workflow_dispatch:
 
 env:
   FFMPEG_RELEASE_TAG: autobuild-2026-07-31-14-10
@@ -24,7 +24,7 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           version: '5.15.2'
-          arch: 'win32_mingw81'
+          arch: 'win32_mingw' # <-- Fixed the spelling here!
           modules: qtimageformats
           cache: true
 
