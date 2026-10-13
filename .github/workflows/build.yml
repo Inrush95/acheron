@@ -7,10 +7,6 @@ on:
     branches: [master]
   workflow_dispatch:
 
-env:
-  FFMPEG_URL: https://github.com
-  FFMPEG_DIR_NAME: ffmpeg-n7.1-win32-lgpl-shared
-
 jobs:
   build-windows-32bit-voice:
     runs-on: windows-latest
@@ -39,17 +35,15 @@ jobs:
           path: build/vcpkg_installed
           key: vcpkg-x86-windows-static-md-${{ hashFiles('vcpkg.json') }}
 
-      - name: Install 32-bit FFmpeg
+      - name: Install 32-bit Dependencies via vcpkg
         shell: cmd
         run: |
-          curl -L -o ffmpeg.zip %FFMPEG_URL%
-          7z x ffmpeg.zip -y
-          move %FFMPEG_DIR_NAME% ffmpeg
+          .\vendor\vcpkg\vcpkg install ffmpeg[gpl,opus]:x86-windows-static-md libsodium:x86-windows-static-md
 
       - name: Configure CMake
         shell: cmd
         run: |
-          cmake -B build -S . -A Win32 -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x86-windows-static-md -DCMAKE_PREFIX_PATH="%QT_ROOT_DIR%;%GITHUB_WORKSPACE%/ffmpeg" -DBUILD_TESTS=OFF -DENABLE_VOICE=ON -DENABLE_RNNOISE=ON -DENABLE_FFMPEG=ON
+          cmake -B build -S . -A Win32 -DCMAKE_BUILD_TYPE=Release -DVCPKG_TARGET_TRIPLET=x86-windows-static-md -DCMAKE_PREFIX_PATH="%QT_ROOT_DIR%" -DBUILD_TESTS=OFF -DENABLE_VOICE=ON -DENABLE_RNNOISE=ON -DENABLE_FFMPEG=ON
 
       - name: Build App
         run: cmake --build build --config Release --parallel
@@ -64,7 +58,6 @@ jobs:
         run: |
           mkdir acheron-windows7-32bit-voice
           xcopy build\Release\* acheron-windows7-32bit-voice\ /E /Y
-          xcopy ffmpeg\bin\*.dll acheron-windows7-32bit-voice\ /Y
           rmdir /S /Q acheron-windows7-32bit-voice\CMakeFiles
 
       - name: Upload 32-bit App Bundle
