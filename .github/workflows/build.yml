@@ -35,11 +35,7 @@ jobs:
           path: build/vcpkg_installed
           key: vcpkg-x86-windows-static-md-${{ hashFiles('vcpkg.json') }}
 
-      - name: Install 32-bit Dependencies via vcpkg
-        shell: cmd
-        run: |
-          .\vendor\vcpkg\vcpkg install ffmpeg[gpl,opus]:x86-windows-static-md libsodium:x86-windows-static-md
-
+      # We deleted the broken manual step! CMake handles the download in manifest mode now.
       - name: Configure CMake
         shell: cmd
         run: |
