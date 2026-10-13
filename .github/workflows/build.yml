@@ -25,7 +25,7 @@ jobs:
         with:
           version: '5.15.2'
           arch: 'win32_msvc2019'
-          modules: qtimageformats
+          # Removed the modules line to fix the XML parsing error!
           cache: true
 
       - name: Bootstrap vcpkg
@@ -52,7 +52,7 @@ jobs:
       - name: Configure CMake
         shell: pwsh
         run: |
-          ffmpegDir = "{{ github.workspace }}/ffmpeg"
+          \(ffmpegDir = "\){{ github.workspace }}/ffmpeg"
           cmake -B build -S . `
             -A Win32 `
             -DCMAKE_BUILD_TYPE=Release `
@@ -69,7 +69,7 @@ jobs:
       - name: Deploy Qt Dependencies
         shell: pwsh
         run: |
-          exe = "{{ github.workspace }}/build/Release/acheron.exe"
+          \(exe = "\){{ github.workspace }}/build/Release/acheron.exe"
           windeployqt --no-translations --no-opengl-sw --no-system-d3d-compiler \$exe
 
       - name: Prepare Artifact Folder
@@ -77,11 +77,11 @@ jobs:
         run: |
           \$out = "acheron-windows7-32bit-voice"
           \$binDir = "build/Release"
-          ffmpegDir = "{{ github.workspace }}/ffmpeg"
+          \(ffmpegDir = "\){{ github.workspace }}/ffmpeg"
           New-Item -ItemType Directory -Path \$out -Force
           
-          Copy-Item "binDir/*" out -Recurse -Force
-          Copy-Item "ffmpegDir/bin/*.dll" out -Force
+          Copy-Item "\(binDir/*" \)out -Recurse -Force
+          Copy-Item "\(ffmpegDir/bin/*.dll" \)out -Force
           Remove-Item "\$out/CMakeFiles" -Recurse -ErrorAction SilentlyContinue
 
       - name: Upload 32-bit App Bundle
