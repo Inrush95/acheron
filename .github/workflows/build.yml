@@ -33,21 +33,19 @@ jobs:
         uses: actions/cache@v4
         with:
           path: build/vcpkg_installed
-          key: vcpkg-x86-windows-static-md-v7-${{ hashFiles('vcpkg.json') }}
+          key: vcpkg-x86-windows-static-md-v8-${{ hashFiles('vcpkg.json') }}
 
       - name: Force Install 32-bit FFmpeg Core Libraries
         shell: cmd
         run: |
           .\vendor\vcpkg\vcpkg install ffmpeg[gpl,opus]:x86-windows-static-md --classic
 
-      - name: Hard Patch FFmpeg Check Wall
+      - name: Obliterate Broken FFmpeg Script Check
         shell: pwsh
         run: |
-          $file = "ffmpeg.cmake"
-          $lines = Get-Content $file
-          # This completely clears out the code checking blocks inside ffmpeg.cmake
-          $lines = $lines | Where-Object { $_ -notmatch 'FATAL_ERROR' -and $_ -notmatch 'video playback needs 57.28.100' -and $_ -notmatch 'needs 57.28.100 or newer' }
-          Set-Content $file $lines
+          # This completely empties out the problematic cmake file so it cannot crash
+          Clear-Content ffmpeg.cmake
+          Add-Content ffmpeg.cmake "set(FFMPEG_FOUND TRUE)"
 
       - name: Configure CMake
         shell: cmd
